@@ -265,6 +265,16 @@ impl Spawner {
         handle
     }
 
+    pub(crate) fn spawn_front<F>(&self, future: F) -> JoinHandle<F::Output>
+    where
+        F: Future + Send + 'static,
+        F::Output: Send + 'static,
+    {
+        let (task, handle) = task::joinable(future);
+        self.shared.schedule_front(task);
+        handle
+    }
+
     fn pop(&self) -> Option<task::Notified<Arc<Shared>>> {
         self.shared.queue.lock().unwrap().pop_front()
     }
@@ -308,6 +318,18 @@ impl Schedule for Arc<Shared> {
             }
             _ => {
                 self.queue.lock().unwrap().push_back(task);
+                self.unpark.unpark();
+            }
+        });
+    }
+
+    fn schedule_front(&self, task: task::Notified<Self>) {
+        CURRENT.with(|maybe_cx| match maybe_cx {
+            Some(cx) if Arc::ptr_eq(self, &cx.shared) => {
+                cx.tasks.borrow_mut().queue.push_front(task);
+            }
+            _ => {
+                self.queue.lock().unwrap().push_front(task);
                 self.unpark.unpark();
             }
         });

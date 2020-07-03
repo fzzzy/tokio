@@ -228,6 +228,7 @@ cfg_rt_core! {
 
     mod spawn;
     pub use spawn::spawn;
+    pub use spawn::spawn_front;
 
     mod yield_now;
     pub use yield_now::yield_now;

@@ -682,6 +682,10 @@ impl task::Schedule for Arc<Worker> {
         self.shared.schedule(task, false);
     }
 
+    fn schedule_front(&self, _task: Notified) {
+        unreachable!();
+    }
+
     fn yield_now(&self, task: Notified) {
         self.shared.schedule(task, true);
     }

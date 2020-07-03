@@ -386,6 +386,7 @@ cfg_not_sync! {
 cfg_rt_core! {
     pub mod task;
     pub use task::spawn;
+    pub use task::spawn_front;
 }
 
 cfg_time! {

@@ -21,4 +21,8 @@ impl task::Schedule for NoopSchedule {
     fn schedule(&self, _task: task::Notified<Self>) {
         unreachable!();
     }
+
+    fn schedule_front(&self, _task: task::Notified<Self>) {
+        unreachable!();
+    }
 }

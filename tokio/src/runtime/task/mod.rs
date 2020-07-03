@@ -72,6 +72,8 @@ pub(crate) trait Schedule: Sync + Sized + 'static {
     /// Schedule the task
     fn schedule(&self, task: Notified<Self>);
 
+    fn schedule_front(&self, task: Notified<Self>);
+
     /// Schedule the task to run in the near future, yielding the thread to
     /// other tasks.
     fn yield_now(&self, task: Notified<Self>) {

@@ -33,5 +33,19 @@ cfg_rt_core! {
                 Spawner::ThreadPool(spawner) => spawner.spawn(future),
             }
         }
+
+        pub(crate) fn spawn_front<F>(&self, future: F) -> JoinHandle<F::Output>
+        where
+            F: Future + Send + 'static,
+            F::Output: Send + 'static,
+        {
+            match self {
+                Spawner::Shell => panic!("spawning not enabled for runtime"),
+                #[cfg(feature = "rt-core")]
+                Spawner::Basic(spawner) => spawner.spawn_front(future),
+                #[cfg(feature = "rt-threaded")]
+                Spawner::ThreadPool(_spawner) => panic!("spawning not enabled for runtime"),
+            }
+        }
     }
 }

@@ -552,6 +552,18 @@ impl Shared {
         });
     }
 
+    fn schedule_front(&self, task: task::Notified<Arc<Self>>) {
+        CURRENT.with(|maybe_cx| match maybe_cx {
+            Some(cx) if cx.shared.ptr_eq(self) => {
+                cx.tasks.borrow_mut().queue.push_front(task);
+            }
+            _ => {
+                self.queue.lock().unwrap().push_front(task);
+                self.waker.wake();
+            }
+        });
+    }
+
     fn ptr_eq(&self, other: &Shared) -> bool {
         self as *const _ == other as *const _
     }
@@ -583,5 +595,9 @@ impl task::Schedule for Arc<Shared> {
 
     fn schedule(&self, task: task::Notified<Self>) {
         Shared::schedule(self, task);
+    }
+
+    fn schedule_front(&self, task: task::Notified<Self>) {
+        Shared::schedule_front(self, task);
     }
 }
